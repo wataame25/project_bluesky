@@ -1,0 +1,50 @@
+name: bsky-judge
+
+on:
+  schedule:
+    # 15分おき（GitHub側の混雑で数分ずれることがあります）
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "投稿せずログだけ出す"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bsky-judge
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Run judge
+        env:
+          BSKY_HANDLE: ${{ secrets.BSKY_HANDLE }}
+          BSKY_APP_PASSWORD: ${{ secrets.BSKY_APP_PASSWORD }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: gemini-2.5-flash
+          DRY_RUN: ${{ inputs.dry_run && '1' || '' }}
+        run: python -m src.main
+
+      - name: Persist state
+        run: |
+          git config user.name  "bsky-judge-bot"
+          git config user.email "actions@github.com"
+          git add state/seen.json
+          git diff --staged --quiet || git commit -m "chore: update state [skip ci]"
+          git push

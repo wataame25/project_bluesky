@@ -121,6 +121,15 @@ class BlueskyClient:
 # ---------- thread helpers ----------
 
 
+def has_bot_replied(thread_node: dict[str, Any], bot_handle: str) -> bool:
+    """Return True if the bot already has a direct reply under this post."""
+    for reply in thread_node.get("replies", []):
+        post = reply.get("post", {})
+        if post.get("author", {}).get("handle") == bot_handle:
+            return True
+    return False
+
+
 def flatten_ancestors(thread_node: dict[str, Any], max_posts: int = 60) -> list[dict[str, Any]]:
     """Walk from the summoning post up to the root, return chronological chain."""
     chain: list[dict[str, Any]] = []

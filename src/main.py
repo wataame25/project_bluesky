@@ -9,7 +9,7 @@ import pathlib
 import sys
 import traceback
 
-from .bluesky import BlueskyClient, flatten_ancestors
+from .bluesky import BlueskyClient, flatten_ancestors, has_bot_replied
 from .formatter import format_skip, format_verdict
 from .judge import build_transcript, judge
 
@@ -53,6 +53,9 @@ def handle_mention(bs: BlueskyClient, notif: dict, gemini_key: str, model: str) 
     print(f"  summoned by @{summoner}")
 
     thread = bs.get_post_thread(uri).get("thread", {})
+    if has_bot_replied(thread, bs.handle):
+        print("  already replied, skipping")
+        return
     chain = flatten_ancestors(thread)
     if not chain:
         print("  ! could not read thread")

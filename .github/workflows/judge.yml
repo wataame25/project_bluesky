@@ -2,8 +2,8 @@ name: bsky-judge
 
 on:
   schedule:
-    # 15分おき（GitHub側の混雑で数分ずれることがあります）
-    - cron: "*/15 * * * *"
+    # 5分おき（GitHub Actionsの最小間隔・GitHub側の混雑で数分ずれることがあります）
+    - cron: "*/5 * * * *"
   workflow_dispatch:
     inputs:
       dry_run:

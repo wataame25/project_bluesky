@@ -7,7 +7,7 @@ from typing import Any
 
 import requests
 
-TIMEOUT = 60
+TIMEOUT = 120
 ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 
 AXES = [
